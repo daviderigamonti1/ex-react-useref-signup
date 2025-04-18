@@ -1,32 +1,24 @@
-// Milestone 2: Validare in tempo reale
-// Aggiungere la validazione in tempo reale dei seguenti campi:
+// Milestone 3: Convertire i Campi Non Controllati
+// Non tutti i campi del form necessitano di essere aggiornati a ogni carattere digitato. Alcuni di essi non influenzano direttamente l’interfaccia mentre l’utente li compila, quindi è possibile gestirli in modo più efficiente.
 
-// ✅ Username: Deve contenere solo caratteri alfanumerici e almeno 6 caratteri (no spazi o simboli).
+// Analizza il form: Identifica quali campi devono rimanere controllati e quali invece possono essere non controllati senza impattare l’esperienza utente.
+// Converti i campi non controllati: Usa useRef() per gestirli e recuperare il loro valore solo al momento del submit.
+// Assicurati che la validazione continui a funzionare: Anche se un campo non è controllato, deve comunque essere validato correttamente quando l’utente invia il form.
 
-// ✅ Password: Deve contenere almeno 8 caratteri, 1 lettera, 1 numero e 1 simbolo.
-
-// ✅ Descrizione: Deve contenere tra 100 e 1000 caratteri (senza spazi iniziali e finali).
-
-// Suggerimento: Per semplificare la validazione, puoi definire tre stringhe con i caratteri validi e usare .includes() per controllare se i caratteri appartengono a una di queste categorie:
-
-// const letters = "abcdefghijklmnopqrstuvwxyz";
-// const numbers = "0123456789";
-// const symbols = "!@#$%^&*()-_=+[]{}|;:'\\",.<>?/`~";
-// Per ciascuno dei campi validati in tempo reale, mostrare un messaggio di errore (rosso) nel caso non siano validi, oppure un messaggio di conferma (verde) nel caso siano validi.
-
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef } from 'react';
 
 const letters = "abcdefghijklmnopqrstuvwxyz";
 const numbers = "0123456789";
 const symbols = "!@#$%^&*()-_=+[]{}|;:'\",.<>?/`~";
 
 function App() {
-  const [name, setName] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [specialization, setSpecialization] = useState("");
-  const [yearsExperience, setYearsExperience] = useState("");
   const [description, setDescription] = useState("");
+
+  const refName = useRef();
+  const refSpecialization = useRef();
+  const refExperience = useRef();
 
   const isUsernameValid = useMemo(() => {
     const charsValid = username.split("").every(char =>
@@ -53,6 +45,9 @@ function App() {
 
   function handleSubmit(e) {
     e.preventDefault();
+    const name = refName.current.value;
+    const specialization = refSpecialization.current.value;
+    const yearsExperience = refExperience.current.value;
     if (
       !name.trim() ||
       !username.trim() ||
@@ -68,6 +63,7 @@ function App() {
       alert("Errore: Compilare tutti i campi correttamente");
       return;
     }
+
     console.log('Submit effettuato:', {
       name,
       username,
@@ -76,12 +72,20 @@ function App() {
       yearsExperience,
       description
     });
-    setName("");
+
+    resetForm();
+  }
+
+  function resetForm() {
+    // Reset dei campi controllati
     setUsername("");
     setPassword("");
-    setSpecialization("");
-    setYearsExperience("");
     setDescription("");
+
+    // Reset dei campi non controllati (via ref)
+    refName.current.value = "";
+    refSpecialization.current.value = "";
+    refExperience.current.value = "";
   }
 
   return (
@@ -92,8 +96,7 @@ function App() {
           <p>Nome Completo</p>
           <input
             type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
+            ref={refName}
           />
         </label>
         <label>
@@ -125,8 +128,7 @@ function App() {
         <label>
           <p>Specializzazione</p>
           <select
-            value={specialization}
-            onChange={(e) => setSpecialization(e.target.value)}
+            ref={refSpecialization}
           >
             <option value="">-- Seleziona --</option>
             <option value="Full Stack">Full Stack</option>
@@ -138,8 +140,7 @@ function App() {
           <p>Anni di esperienza</p>
           <input
             type="number"
-            value={yearsExperience}
-            onChange={(e) => setYearsExperience(e.target.value)}
+            ref={refExperience}
           />
         </label>
         <label>
